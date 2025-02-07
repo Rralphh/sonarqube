@@ -21,7 +21,6 @@ jobs:
           java-version: '17'
 
       - name: Run Gradle Build (Run 2 Specific Tests)
-        # This runs only the two specified tests.
         run: |
           ./gradlew clean test \
             --tests "org.sonar.core.util.SystemPingIntegrationTest" \
@@ -32,14 +31,12 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Test-Results
-          # Adjust the path if your test reports are generated elsewhere.
-          path: **/build/reports/tests/
+          path: "**/build/reports/tests/"
 
       - name: Upload Executable Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Executable
-          # Adjust this path as needed.
           path: sonar-application/build/distributions/
 
       - name: Set up SSH Key for Authentication
@@ -49,4 +46,4 @@ jobs:
 
       - name: Run Command on Homelab
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.HOST_USER }}@${{ secrets.HOST_IP }} "deploy_sonarqube.sh"
+          ssh -o StrictHostKeyChecking=no "${{ secrets.HOST_USER }}@${{ secrets.HOST_IP }}" "deploy_sonarqube.sh"
