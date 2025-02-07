@@ -22,7 +22,7 @@ jobs:
 
       - name: Run Gradle Build (Run 2 Specific Tests)
         run: |
-          ./gradlew clean test \
+          ./gradlew clean :sonar-core:test \
             --tests "org.sonar.core.util.SystemPingIntegrationTest" \
             --tests "org.sonar.core.util.SonarQubeHealthCheckTest"
 
