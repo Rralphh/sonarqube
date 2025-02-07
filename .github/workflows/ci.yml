@@ -21,7 +21,7 @@ jobs:
           --health-timeout 30s
           --health-retries 20
           -e SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
-          -e SONAR_JDBC_URL=jdbc:h2:mem:sonar;MODE=PostgreSQL;NON_KEYWORDS=VALUE
+          -e SONAR_JDBC_URL=jdbc:h2:mem:sonar;NON_KEYWORDS=VALUE
 
     steps:
       - name: Checkout repository
