@@ -22,7 +22,7 @@ public class SonarQubeHealthCheckTest {
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("GET");
 
-        String credentials = "admin:Ralphelkhoury00!!";
+        String credentials = "admin:admin";
         byte[] encodedCreds = Base64.encodeBase64(credentials.getBytes(StandardCharsets.UTF_8));
         conn.setRequestProperty("Authorization", "Basic " + new String(encodedCreds, StandardCharsets.UTF_8));
 
