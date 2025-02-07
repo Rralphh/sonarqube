@@ -10,6 +10,19 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    services:
+      sonarqube:
+        image: sonarqube:community
+        ports:
+          - 9000:9000
+        options: >-
+          --health-cmd "curl -f http://localhost:9000/api/system/health || exit 1"
+          --health-interval 10s
+          --health-timeout 30s
+          --health-retries 20
+          -e SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
+          -e SONAR_JDBC_URL=jdbc:h2:mem:sonar
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -20,13 +33,20 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: Wait for SonarQube to start
+        run: |
+          echo "Waiting for SonarQube to start..."
+          for i in {1..50}; do
+            STATUS=$(curl -s http://localhost:9000/api/system/health || echo "")
+            echo "SonarQube Health: $STATUS"
+            if echo "$STATUS" | grep -q '"health":"GREEN"'; then
+              echo "SonarQube is ready!"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "❌ SonarQube did not start in time!" && exit 1
+
       - name: Run Gradle Tests
         run: |
           ./gradlew clean test --tests "org.sonar.core.util.SonarQubeHealthCheckTest" --tests "org.sonar.core.util.SystemPingIntegrationTest"
-
-      - name: SonarCloud Analysis
-        run: |
-          ./gradlew sonar --info
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: "https://sonarcloud.io"
