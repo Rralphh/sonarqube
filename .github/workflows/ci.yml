@@ -8,7 +8,7 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest  # 🔴 Changed from 'windows-latest' to 'ubuntu-latest'
+    runs-on: ubuntu-latest
 
     services:
       sonarqube:
@@ -18,8 +18,9 @@ jobs:
         options: >-
           --health-cmd "curl -f http://localhost:9000/api/system/health || exit 1"
           --health-interval 10s
-          --health-timeout 5s
-          --health-retries 10
+          --health-timeout 10s
+          --health-retries 15
+          --memory=4g  # 🔹 Increase memory allocation
           -e SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
           -e SONARQUBE_JDBC_URL=jdbc:h2:mem:sonar
         env:
@@ -39,7 +40,7 @@ jobs:
         shell: bash
         run: |
           echo "Waiting for SonarQube..."
-          for i in {1..30}; do
+          for i in {1..40}; do  # 🔹 Increase retry attempts
             if curl -s http://localhost:9000/api/system/health | grep -q "GREEN"; then
               echo "SonarQube is ready!"
               exit 0
