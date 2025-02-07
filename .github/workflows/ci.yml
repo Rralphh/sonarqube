@@ -1,41 +1,52 @@
-name: SonarCloud Analysis
+name: Gradle Build
 
 on:
+  workflow_dispatch: {}
   push:
     branches:
       - master
-  pull_request:
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Set up JDK 17
+      - name: Set up Java
         uses: actions/setup-java@v3
         with:
-          distribution: temurin
+          distribution: 'temurin'
           java-version: '17'
 
-      - name: Cache SonarCloud packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-
-      - name: Build and run tests
-        run: ./gradlew clean build
-
-      - name: Run SonarCloud analysis
-        env:
-          # Use your existing GitHub secret (sonar.token)
-          SONAR_TOKEN: ${{ secrets.sonar.token }}
+      - name: Run Gradle Build (Run 2 Specific Tests)
+        # This runs only the two specified tests.
         run: |
-          ./gradlew sonarqube \
-            -Dsonar.projectKey=your-project-key \
-            -Dsonar.organization=your-organization \
-            -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.login=${{ secrets.sonar.token }}
+          ./gradlew clean test \
+            --tests "org.sonar.core.util.SystemPingIntegrationTest" \
+            --tests "org.sonar.core.util.SonarQubeHealthCheckTest"
+
+      - name: Upload Test Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Test-Results
+          # Adjust the path if your test reports are generated elsewhere.
+          path: **/build/reports/tests/
+
+      - name: Upload Executable Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Executable
+          # Adjust this path as needed.
+          path: sonar-application/build/distributions/
+
+      - name: Set up SSH Key for Authentication
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Run Command on Homelab
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.HOST_USER }}@${{ secrets.HOST_IP }} "deploy_sonarqube.sh"
