@@ -19,9 +19,11 @@ jobs:
           --health-cmd "curl -f -u admin:admin http://localhost:9000/api/system/health || exit 1"
           --health-interval 10s
           --health-timeout 30s
-          --health-retries 20
+          --health-retries 60
           -e SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
           -e SONAR_JDBC_URL=jdbc:h2:mem:sonar;NON_KEYWORDS=VALUE
+          -e SONAR_WEB_JAVA_OPTS=-Xmx2g
+          -e SONAR_CE_JAVA_OPTS=-Xmx2g
 
     steps:
       - name: Checkout repository
@@ -36,7 +38,7 @@ jobs:
       - name: Wait for SonarQube to start
         run: |
           echo "Waiting for SonarQube to start..."
-          for i in {1..50}; do
+          for i in {1..60}; do
             STATUS=$(curl -s -u admin:admin http://localhost:9000/api/system/health || echo "")
             echo "SonarQube Health: $STATUS"
             if echo "$STATUS" | grep -q '"health":"GREEN"'; then
