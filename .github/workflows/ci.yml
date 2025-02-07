@@ -8,7 +8,7 @@ on:
 
 jobs:
   test:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest  # 🔴 Changed from 'windows-latest' to 'ubuntu-latest'
 
     services:
       sonarqube:
