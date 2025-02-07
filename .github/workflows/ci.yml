@@ -12,7 +12,7 @@ jobs:
 
     services:
       sonarqube:
-        image: sonarqube:community
+        image: sonarqube:community  # 🔹 Using community version
         ports:
           - 9000:9000
         options: >-
@@ -20,7 +20,6 @@ jobs:
           --health-interval 10s
           --health-timeout 10s
           --health-retries 15
-          --memory=4g  # 🔹 Increase memory allocation
           -e SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
           -e SONARQUBE_JDBC_URL=jdbc:h2:mem:sonar
         env:
@@ -40,7 +39,7 @@ jobs:
         shell: bash
         run: |
           echo "Waiting for SonarQube..."
-          for i in {1..40}; do  # 🔹 Increase retry attempts
+          for i in {1..40}; do  # 🔹 Increased retries for stability
             if curl -s http://localhost:9000/api/system/health | grep -q "GREEN"; then
               echo "SonarQube is ready!"
               exit 0
